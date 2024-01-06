@@ -1,13 +1,14 @@
 # SimpleSiteClass Verion 1.0.0
 
-**SimpleSiteClass** is a PHP mini framework for simple, small websites. It can be esaly combined with other frameworks or templeting engines if needed. 
+**SimpleSiteClass** is a PHP mini framework for simple, small websites. It uses the *mysqli* class. 
+It can be esaly combined with other frameworks or templeting engines if needed. 
 For small websites I feel that frameworks like Laravel or Meteor etc. are just too much.
 
 See [github.com/bartonlp/simple-site-class](https://github.com/bartonlp/simple-site-class) for a full list of changes.
 
-## SiteClass Documentation 
+## SimpleSiteClass Documentation 
 
-[SiteClass Documentation](https://bartonlp.github.io/simple-site-class)
+[SimpleSiteClass Documentation](https://bartonlp.github.io/simple-site-class)
 
 ## Contact Me
 
