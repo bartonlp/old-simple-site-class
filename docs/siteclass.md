@@ -56,6 +56,6 @@ Also, the dbMysqli is well documented in the SimpledbMysqli.Class.php file.
 ## Contact Me
 
 Barton Phillips : <a href="mailto://bartonphillips@gmail.com">bartonphillips@gmail.com</a>  
-Copyright &copy; 2023 Barton Phillips  
+Copyright &copy; 2024 Barton Phillips  
 Project maintained by [Barton Phillips](https://github.com/bartonlp)  
-Last modified November 10, 2023
+Last modified January 6, 2024

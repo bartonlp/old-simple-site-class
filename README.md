@@ -13,6 +13,6 @@ See [github.com/bartonlp/simple-site-class](https://github.com/bartonlp/simple-s
 
 Barton Phillips : [bartonphillips@gmail.com](mailto://bartonphillips@gmail.com)  
 [My Website](http://www.bartonphillips.com)  
-Copyright &copy; 2023 Barton Phillips  
-Last Modified October 29, 2023
+Copyright &copy; 2024 Barton Phillips  
+Last Modified January 6, 2024
 

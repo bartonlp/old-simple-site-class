@@ -136,8 +136,8 @@ more documentation in the /docs directory.
 ## Contact me
 
 Barton Phillips : <bartonphillips@gmail.com>  
-Copyright © 2023 Barton Phillips  
-Last modified November 10, 2023
+Copyright © 2024 Barton Phillips  
+Last modified January 6, 2024
 </section>
 <footer>
 
