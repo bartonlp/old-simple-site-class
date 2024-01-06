@@ -8,9 +8,9 @@
 
 namespace bartonlp\siteload;
 
-define("SITELOAD_VERSION", "1.0.0siteload"); // BLP 2023-08-11 - add static $mysitemap
+define("SITELOAD_VERSION", "1.0.0siteload-mysqli"); // BLP 2023-08-11 - add static $mysitemap
 define("SITECLASS_DIR", __DIR__);
-require_once(__DIR__ ."/../../../autoload.php");
+require_once("/var/www/vendor/autoload.php");
 
 // If we only want the version info $__VERSION is set. We do this in whatisloaded.class.php.
 // It can also be done to get the versions of beacon.php and tracker.php.
