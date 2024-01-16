@@ -11,7 +11,7 @@
  * @license http://opensource.org/licenses/gpl-3.0.html GPL Version 3
  */
 
-define("MYSQL_CLASS_VERSION", "4.0.0mysqli"); 
+define("MYSQL_CLASS_VERSION", "4.0.1mysqli"); // BLP 2024-01-15 - change query() to sql()
 
 /**
  * See http://www.php.net/manual/en/mysqli.overview.php for more information on the Improved API.
@@ -29,9 +29,8 @@ define("MYSQL_CLASS_VERSION", "4.0.0mysqli");
  * The password is optional and if not pressent is picked up form my $HOME.
  */
 
-class SimpledbMysqli {
+class SimpledbMysqli extends mysqli {
   private $result; // for select etc. a result set.
-  public $db;
   static public $lastQuery = null; // for debugging
   static public $lastNonSelectResult = null; // for insert, update etc.
 
@@ -70,19 +69,18 @@ class SimpledbMysqli {
     //   int $port = ini_get("mysqli.default_port"),
     //   string $socket = ini_get("mysqli.default_socket")
     // )
+
+    parent::__construct($host, $user, $password, $database, $port);
     
-    $db = new mysqli($host, $user, $password, $database, $port); // $port is usually null.
-    
-    if($db->connect_errno) {
-      $this->errno = $db->connect_errno;
-      $this->error = $db->connect_error;
+    if($this->connect_errno) {
+      $this->errno = $this->connect_errno;
+      $this->error = $this->connect_error;
       throw new SimpleSqlException(__METHOD__ . ": Can't connect to database", $this);
     }
 
     // BLP 2021-12-31 -- EST/EDT New York
-    $db->query("set time_zone='EST5EDT'");
-    $this->db = $db;
-    $this->db->database = $database;
+    $this->query("set time_zone='EST5EDT'"); // raw mysqli query
+    $this->database = $database;
   } // End of constructor.
 
   /*
@@ -96,38 +94,36 @@ class SimpledbMysqli {
 
   /*
    * getDbErrno
-   * @returns $this->db-errno from mysqli.
+   * @returns $this->errno from mysqli.
    */
   
   public function getDbErrno() {
-    return $this->db->errno;
+    return $this->errno;
   }
 
   /*
    * getDbError
-   * @returns $this->db->error from mysqli
+   * @returns $this->error from mysqli
    */
   
   public function getDbError() {
-    return $this->db->error;
+    return $this->error;
   }
   
   /**
-   * query()
+   * sql()
    * Query database table
-   * BLP 2016-11-20 -- Query is for a SINGLE query ONLY. Don't do multiple querys!
+   * BLP 2016-11-20 -- query is for a SINGLE query ONLY. Don't do multiple querys!
    * mysqli has a multi_query() but I have not written a method for it!
    * @param string $query SQL statement.
    * @return: if $result === true returns the number of affected_rows (delete, insert, etc). Else ruturns num_rows.
    * if $result === false throws SqlException().
    */
 
-  public function query($query) {
-    $db = $this->db;
-    
+  public function sql($query) {
     self::$lastQuery = $query; // for debugging
 
-    $result = $db->query($query);
+    $result = $this->query($query); // raw mysqli query
 
     // If $result is false then exit
     
@@ -138,7 +134,7 @@ class SimpledbMysqli {
     // result is a mixed result-set for select etc, true for insert etc.
     
     if($result === true) { // did not return a result object. NOTE can't be false as we covered that above.
-      $numrows = $db->affected_rows;
+      $numrows = $this->affected_rows;
       self::$lastNonSelectResult = $result; // for debugging
     } else {
       // NOTE: we don't change result for inserts etc. only for selects etc.
@@ -150,7 +146,7 @@ class SimpledbMysqli {
   }
 
   /**
-   * prepare()
+   * sqlPrepare()
    * mysqli::prepare()
    * used as follows:
    * 1) $username="bob"; $query = "select one, two from test where name=?";
@@ -164,9 +160,8 @@ class SimpledbMysqli {
    * You will have to use the native PHP functions with the returned $stm.
    */
   
-  public function prepare($query) {
-    $db = $this->db;
-    $stm = $db->prepare($query);
+  public function sqlPrepare($query) {
+    $stm = $this->prepare($query); // raw mysqli prepare
     return $stm;
   }
 
@@ -203,7 +198,7 @@ class SimpledbMysqli {
       $type = 'both';
     }  
     
-    $numrows = $this->query($query);
+    $numrows = $this->sql($query);
 
     while($row = $this->fetchrow($type)) {
       $rows[] = $row;
@@ -264,8 +259,7 @@ class SimpledbMysqli {
    */
 
   public function getLastInsertId() {
-    $db = $this->db;
-    return $db->insert_id;
+    return $this->insert_id;
   }
   
   /**
@@ -275,8 +269,7 @@ class SimpledbMysqli {
   public function getNumRows($result=null) {
     if(!$result) $result = $this->result;
     if($result === true) {
-      $db = $this->getDb();
-      return $db->affected_rows;
+      return $this->affected_rows;
     } else {
       return $result->num_rows;
     }
@@ -304,7 +297,7 @@ class SimpledbMysqli {
   // real_escape_string
   
   public function escape($string) {
-    return @$this->db->real_escape_string($string);
+    return @$this->real_escape_string($string);
   }
 
   public function escapeDeep($value) {
