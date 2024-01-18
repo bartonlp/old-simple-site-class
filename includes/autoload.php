@@ -1,6 +1,7 @@
 <?php
 // Auto load classes
-
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING & ~E_NOTICE);
+                  
 if(!function_exists("_callback")) { // In case we call autoload twice.
   function _callback($class) {
     $class = preg_replace("~Simple~", "", $class);

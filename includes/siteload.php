@@ -8,6 +8,8 @@
 
 namespace bartonlp\siteload;
 
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_WARNING & ~E_NOTICE);
+
 define("SITELOAD_VERSION", "1.0.0siteload-mysqli"); // BLP 2023-08-11 - add static $mysitemap
 define("SITECLASS_DIR", __DIR__);
 require_once("/var/www/vendor/autoload.php");
@@ -25,8 +27,6 @@ if(!class_exists("getinfo")) {
 
     public function __construct() {
       //error_log("siteload simple-site-class");
-
-      $old = error_reporting(E_ALL & ~(E_NOTICE | E_WARNING | E_STRICT));
 
       // Now check to see if we have a DOCUMENT_ROOT or VIRTUALHOST_DOCUMENT_ROOT.
       // If we DON't we will use PWD which should be and if SCRIPT_FILENAME is not dot (.)
@@ -96,8 +96,6 @@ if(!class_exists("getinfo")) {
           \ErrorClass::setErrlast(true);
         }
       }
-
-      error_reporting($old);
     }
 
     // getVersion

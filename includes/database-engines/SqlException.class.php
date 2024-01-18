@@ -6,7 +6,7 @@
  * Extends Exception
  */
 
-define("SQLEXCEPTION_CLASS_VERSION", "4.0.1exception"); // BLP 2024-01-16 - fixed SqlError removed $db.
+define("SQLEXCEPTION_CLASS_VERSION", "4.0.2exception-mysqli"); // BLP 2024-01-16 - fixed SqlError removed $db.
 
 class SimpleSqlException extends Exception {
   /**

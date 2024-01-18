@@ -1,7 +1,7 @@
 <?php
 /* Well tested and maintained */
 
-define("DATABASE_CLASS_VERSION", "1.0.1database"); // BLP 2023-02-24 -
+define("DATABASE_CLASS_VERSION", "1.0.2database-mysqli"); 
 
 /**
  * Database wrapper class

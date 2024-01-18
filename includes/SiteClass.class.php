@@ -3,7 +3,7 @@
 // BLP 2023-10-02 - Note that the constructor calls the Database constructor which in turn call the
 // dbMysqli constructor which does all of the heavy lifting.
 
-define("SITE_CLASS_VERSION", "1.0.0simple"); 
+define("SITE_CLASS_VERSION", "1.0.1simple-mysqli"); 
 
 // One class for all my sites
 // This version has been generalized to not have anything about my sites in it!
