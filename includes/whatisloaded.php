@@ -62,7 +62,7 @@ EOF;
       "dbMysqli.class.php"=>$this->dbMysqli,
       "dbTables.class.php"=>$this->dbTables, "ErrorClass.class.php"=>$this->ErrorClass,
       "SqlException.class.php"=>$this->SqlException, 
-      "whatisloaded.class.php"=>$whatis,
+      "whatisloaded.class.php"=>$whatis,];
     }
 
     public static function getVersion() {
