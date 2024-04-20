@@ -10,8 +10,9 @@
  * @copyright Copyright (c) 2010, Barton Phillips
  * @license http://opensource.org/licenses/gpl-3.0.html GPL Version 3
  */
+// BLP 2024-04-20 - set mysql time zone
 
-define("MYSQL_CLASS_VERSION", "4.0.1mysqli"); // BLP 2024-01-15 - change query() to sql()
+define("MYSQL_CLASS_VERSION", "4.0.2mysqli"); // BLP 2024-01-15 - change query() to sql()
 
 /**
  * See http://www.php.net/manual/en/mysqli.overview.php for more information on the Improved API.
@@ -79,7 +80,7 @@ class SimpledbMysqli extends mysqli {
     }
 
     // BLP 2021-12-31 -- EST/EDT New York
-    $this->query("set time_zone='EST5EDT'"); // raw mysqli query
+    $this->query("set time_zone='US/Eastern'"); // raw mysqli query
     $this->database = $database;
   } // End of constructor.
 
@@ -439,7 +440,7 @@ EOF;
       curl_setopt_array($ch, $options);
 
       $result = curl_exec($ch);
-      error_log("dbMysqli.class.php, SimpleSqlException: Send To ME (".$s->EMAILADDRESS."). RESULT: $result"); // This should stay!!!
+      error_log("dbMysqli.class.php, Exception: Send To ME (".$s->EMAILADDRESS."). RESULT: $result"); // This should stay!!!
     }
 
     // Log the raw error info.
