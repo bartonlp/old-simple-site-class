@@ -319,71 +319,13 @@ class SimpledbMysqli extends mysqli {
   /*
    * my_exceptionhandler
    * Must be a static
-   * BLP 2023-11-12 - moved from ErrorClas.class.php to here.
+   * BLP 2024-07-07 - Uses New SendGrid version for email
    */
 
   public static function my_exceptionhandler($e) {
     $from =  get_class($e);
 
     $error = $e; // get the full error message
-
-    // If this is a SqlException then the formating etc. was done by the class
-
-    if($from != "SimpleSqlException") {
-      // NOT SqlException
-
-      // Get Trace information
-
-      $traceback = '';
-
-      foreach($e->getTrace() as $v) {
-        // The key here is a numeric and
-        // $v is an assoc array with keys 'file', 'line', 'function', 'class' and 'args'.
-
-        $args = ''; // This will hold the $v2 values
-
-        foreach($v as $k=>$v1) {
-          // $v is an assoc array 'file, line, ...'
-          // most $v1's are strings. 'args' is an array
-          switch($k) {
-            case 'file':
-            case 'line':
-            case 'function':
-            case 'class':
-              $$k = $v1;
-              break;
-            case 'args':
-              foreach($v1 as $v2) {
-                //cout("type of v2: " .gettype($v2));
-                if(is_object($v2)) {
-                  $v2 = get_class($v2);
-                } elseif(is_array($v2)) {
-                  $v2 = print_r($v2, true);
-                }
-                $$k .= "\"$v2\", ";
-              }
-              break;
-          }
-        }
-        $args = rtrim($args, ", "); // $$k was $args so remove the trailing comma.
-
-        // $$k is $file, $line, etc. So we use the referenced values below.
-
-        $traceback .= " file: $file<br> line: $line<br> class: $from<br>\n".
-                      "function: $function($args)<br><br>";
-      }
-
-      if($traceback) {
-        $traceback = "Trace back:<br>\n$traceback";
-      }
-
-      $error = <<<EOF
-<div style="text-align: center; width: 85%; margin: auto auto; background-color: white; border: 1px solid black; padding: 10px;">
-Class: <b>$from</b><br>\n<b>{$e->getMessage()}</b>
-in file <b>{$e->getFile()}</b><br> on line {$e->getLine()} $traceback
-</div>
-EOF;
-    }
 
     // Remove all html tags.
 
@@ -400,58 +342,40 @@ EOF;
 
     if(!$userId) $userId = "agent: ". $_SERVER['HTTP_USER_AGENT'] . "\n";
 
-    // Email error information to webmaster
-    // During debug set the Error class's $noEmail to ture
+    /* BLP 2024-07-01 - NEW VERSION using sendgrid */
 
-    if(SimpleErrorClass::getNoEmail() !== true) {
+    if(ErrorClass::getNoEmail() !== true) {
       $s = $GLOBALS["_site"];
 
-      $recipients = "{\"address\": {\"email\": \"$s->EMAILADDRESS\",\"header_to\": \"$s->EMAILADDRESS\"}}";
+      $email = new Mail();
+
+      $email->setFrom("ErrorMessage@bartonphillips.com");
+      $email->setSubject($from);
+      $email->addTo($s->EMAILADDRESS);
+  
+      $email->addContent("text/plain", 'View this in HTML mode');
+
       $contents = preg_replace(["~\"~", "~\\n~"], ['','<br>'], "$err<br>$userId");
 
-      $post =<<<EOF
-{"recipients": [
-  $recipients
-],
-  "content": {
-    "from": "SimpleSqlException@mail.bartonphillips.com",
-    "reply_to": "Barton Phillips<barton@bartonphillips.com>",
-    "subject": "$from",
-    "text": "View This in HTML Mode",
-    "html": "$contents"
-  }
-}
-EOF;
+      $email->addContent("text/html", $contents);
 
-      $apikey = file_get_contents("https://bartonphillips.net/sparkpost_api_key.txt"); //("SPARKPOST_API_KEY");
+      $sendgrid = new \SendGrid(getenv('SENDGRID_API_KEY'));
 
-      $options = [
-                  CURLOPT_URL=>"https://api.sparkpost.com/api/v1/transmissions", //?num_rcpt_errors",
-                  CURLOPT_HEADER=>0,
-                  CURLOPT_HTTPHEADER=>[
-                                       "Authorization:$apikey",
-                                       "Content-Type:application/json"
-                                      ],
-                  CURLOPT_POST=>true,
-                  CURLOPT_RETURNTRANSFER=>true,
-                  CURLOPT_POSTFIELDS=>$post
-                                     ];
-      $ch = curl_init();
-      curl_setopt_array($ch, $options);
+      $response = $sendgrid->send($email);
 
-      $result = curl_exec($ch);
-      error_log("dbMysqli.class.php, Exception: Send To ME (".$s->EMAILADDRESS."). RESULT: $result"); // This should stay!!!
+      if($response->statusCode() > 299) {
+        error_log("dbPod sendgrid error: $response->statusCode(), response header: " . print_r($response->headers()));
+      }
     }
 
+    /* BLP 2024-07-01 - END NEW VERSION */
+    
     // Log the raw error info.
-    // BLP 2021-03-06 -- New server is in New York
-    date_default_timezone_set('America/New_York');
-
     // This error_log should always stay in!! *****************
-    error_log("dbMysqli.class.php: $from\n$err\n$userId");
+    error_log("dbPdo.class.php: $from\n$err\n$userId");
     // ********************************************************
 
-    if(SimpleErrorClass::getDevelopment() !== true) {
+    if(ErrorClass::getDevelopment() !== true) {
       // Minimal error message
       $error = <<<EOF
 <p>The webmaster has been notified of this error and it should be fixed shortly. Please try again in
@@ -462,7 +386,7 @@ EOF;
       " Please try again in a couple of hours.";
     }
 
-    if(SimpleErrorClass::getNoHtml() === true) {
+    if(ErrorClass::getNoHtml() === true) {
       $error = "$from: $err";
     } else {
       $error = <<<EOF
@@ -473,7 +397,7 @@ $error
 EOF;
     }
 
-    if(SimpleErrorClass::getNoOutput() !== true) {
+    if(ErrorClass::getNoOutput() !== true) {
       //************************
       // Don't remove this echo
       echo $error; // BLP 2022-01-28 -- on CLI this outputs to the console, on apache it goes to the client screen.
